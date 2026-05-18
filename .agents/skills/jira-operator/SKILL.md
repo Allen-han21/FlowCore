@@ -1,13 +1,13 @@
 ---
 name: jira-operator
-description: Unified Jira operator skill for Codex and Claude. API-first execution with reusable Python scripts, 1Password bootstrap, optional MCP path, and safe write workflow (verify -> dry-run -> apply).
+description: Unified Jira + Confluence operator skill for Codex and Claude. API-first execution with reusable Python scripts, 1Password bootstrap, optional MCP path, and safe write workflow (verify -> dry-run -> apply).
 ---
 
 # Jira Operator
 
 ## Overview
 
-이 스킬은 Jira 조회/분석/수정 작업을 하나의 진입점으로 통합한다.
+이 스킬은 Jira + Confluence(사내 위키) 작업을 하나의 진입점으로 통합한다.
 
 통합 대상:
 - `kidsnote-jira-operator`의 검증된 Python 스크립트 워크플로
@@ -18,12 +18,16 @@ Primary runtime policy:
 - Claude + Jira MCP가 이미 연결된 경우에만 MCP 도구를 선택적으로 사용한다.
 - Non-Claude agent에서 Claude 브리지가 필요하면 `claude -p --permission-mode bypassPermissions`를 사용한다.
 
+Confluence wiki base URL:
+- `https://kidsnote.atlassian.net/wiki`
+
 ## Goal
 
-Codex와 Claude 모두에서 동일한 구조로 Jira 작업을 안전하게 수행한다:
+Codex와 Claude 모두에서 동일한 구조로 Atlassian 작업을 안전하게 수행한다:
 - 읽기: 이슈 확인/배치 조회
 - 쓰기: description 업데이트, child task 생성
 - 운영: 코멘트/전환/요구사항 분석
+- 위키: 페이지 조회/검색/업데이트
 
 ## Execution Paths
 
@@ -36,11 +40,17 @@ Codex와 Claude 모두에서 동일한 구조로 Jira 작업을 안전하게 수
 - `scripts/jira_update_issue_description.py`
 - `scripts/jira_create_child_tasks.py`
 - `scripts/jira_op_run.py`
+- `scripts/wiki_auth.py`
+- `scripts/wiki_verify_page.py`
+- `scripts/wiki_search_pages.py`
+- `scripts/wiki_update_page.py`
 
 인증 입력:
 - `JIRA_BASE_URL`
 - `JIRA_EMAIL`
 - `JIRA_API_TOKEN`
+- `CONFLUENCE_BASE_URL` (미설정 시 `https://kidsnote.atlassian.net/wiki` 기본값 사용)
+- `CONFLUENCE_EMAIL` / `CONFLUENCE_API_TOKEN` (미설정 시 Jira 자격증명 fallback)
 
 ### 2) 1Password bootstrap + single op run (권장)
 
@@ -51,10 +61,12 @@ Codex와 Claude 모두에서 동일한 구조로 Jira 작업을 안전하게 수
 ### 3) MCP (선택)
 
 Claude에서 Jira MCP가 활성화돼 있으면 `jira_get_issue`, `jira_search`, `jira_add_comment`, `jira_transition_issue` 등을 사용할 수 있다.
+Confluence MCP가 활성화돼 있으면 페이지 검색/조회/수정 경로도 선택적으로 사용할 수 있다.
 
 ### 4) Non-Claude -> Claude bridge (선택)
 
 MCP 경로를 써야 하는 non-Claude 환경에서는 `scripts/run_claude_jira_task.sh`를 사용한다.
+위키 작업은 `scripts/run_claude_wiki_task.sh`를 사용한다.
 
 ## Safe Workflow
 
@@ -106,6 +118,31 @@ python3 scripts/jira_create_child_tasks.py \
 bash scripts/run_claude_jira_task.sh --task "PK-12345 이슈 요약과 테스트 시나리오 정리"
 ```
 
+```bash
+# 7) 위키 인증 확인 (기본 URL: https://kidsnote.atlassian.net/wiki)
+python3 scripts/wiki_auth.py --verify
+```
+
+```bash
+# 8) 위키 페이지 조회
+python3 scripts/wiki_verify_page.py 123456789
+```
+
+```bash
+# 9) 위키 CQL 검색
+python3 scripts/wiki_search_pages.py --cql "type = page AND title ~ \"offline cache\" ORDER BY lastmodified DESC" --limit 10
+```
+
+```bash
+# 10) 위키 페이지 업데이트 dry-run
+python3 scripts/wiki_update_page.py 123456789 --body-file /tmp/new-body.html --dry-run
+```
+
+```bash
+# 11) Non-Claude 환경에서 Confluence bridge 사용 (선택)
+bash scripts/run_claude_wiki_task.sh --task "최근 2주 URLCache 관련 위키 문서 검색 후 링크 목록 정리"
+```
+
 ## Constraints
 
 - 실행하지 않은 Jira 결과를 추측/생성하지 않는다.
@@ -124,6 +161,12 @@ bash scripts/run_claude_jira_task.sh --task "PK-12345 이슈 요약과 테스트
 - `jira_bootstrap_1password.py`: bootstrap summary/env mapping
 - `jira_1password.py`: 1Password provider wrapper
 - `run_claude_jira_task.sh`: non-Claude -> Claude bridge
+- `wiki_auth.py`: Confluence auth verify
+- `wiki_verify_page.py`: 위키 페이지 단일 조회
+- `wiki_search_pages.py`: 위키 CQL 검색
+- `wiki_update_page.py`: 위키 페이지 body.storage 업데이트
+- `run_claude_wiki_task.sh`: non-Claude -> Claude bridge for wiki
 
 ### references/
 - `jira-adf-template.md`: description용 ADF 템플릿
+- `wiki-cql-cheatsheet.md`: 위키 CQL 쿼리 예시
