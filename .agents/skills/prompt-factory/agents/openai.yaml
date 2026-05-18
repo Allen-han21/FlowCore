@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prompt Factory"
+  short_description: "계획·구현·리뷰 템플릿을 상황별로 생성하는 워크플로우 스킬"
+  default_prompt: "Use $prompt-factory to generate a plan, implement, review, or git prompt from the right template."
