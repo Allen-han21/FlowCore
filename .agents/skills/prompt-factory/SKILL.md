@@ -13,6 +13,9 @@ It standardizes role boundaries (discover/spec/plan/implement/review/git), outpu
 Recommended workflow for short natural-language requests:
 - `discover.*` -> `spec.*` -> `plan.*` -> `implement.*` -> `review.*`
 
+For semantic risk-heavy tasks, run symbol pass before planning:
+- `discover.symbols` -> `spec.*` -> `plan.*`
+
 ## Workflow
 
 ### Step 1: Pick the stage template ID

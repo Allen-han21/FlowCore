@@ -15,6 +15,7 @@
 
 - `discover.general` (required: `task`)
 - `discover.ios-cache` (required: `task`)
+- `discover.symbols` (required: `task`)
 - `spec.from-discovery` (required: `task`)
 
 ### Plan
@@ -65,6 +66,12 @@ python3 scripts/render_prompt.py \
 ```bash
 python3 scripts/render_prompt.py \
   --template-id spec.from-discovery \
+  --var task="iOS 앱 URL 캐시로 안정성 향상"
+```
+
+```bash
+python3 scripts/render_prompt.py \
+  --template-id discover.symbols \
   --var task="iOS 앱 URL 캐시로 안정성 향상"
 ```
 

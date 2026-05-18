@@ -131,6 +131,53 @@ Output format in ai/discovery.md:
 ## 12. Recommended Next Step
 """,
     },
+    "discover.symbols": {
+        "stage": "discover",
+        "required_vars": ["task"],
+        "body": """Create ai/discovery-symbols.md in Korean.
+
+Task:
+- {{task}}
+
+Act as symbol/LSP discovery analyst only.
+
+{{COMMON_USE}}
+{{COMMON_DISCOVER_RULES}}
+{{COMMON_NO_RUN}}
+
+Goal:
+Collect semantic evidence before spec/plan, focusing on symbol-level coupling and runtime impact.
+
+Investigate with symbol/LSP-first approach:
+1. target symbols to trace (type/function/protocol/property)
+2. definition locations
+3. reference locations
+4. call hierarchy (callers/callees)
+5. protocol/implementation mapping
+6. dependency injection wiring and resolution path
+7. extension/override/delegate/selector linkage if present
+8. cross-module dependency edges
+9. symbols safe-to-change vs risky-to-change
+10. open questions and plan blockers from symbol graph
+
+Evidence policy:
+- Prefer semantic tooling (LSP/symbol index) over plain text grep where possible.
+- Keep exact file/symbol evidence for every conclusion.
+- Separate confirmed facts vs inferred assumptions.
+
+Output format in ai/discovery-symbols.md:
+## 1. Symbol Targets
+## 2. Definition Locations
+## 3. Reference Locations
+## 4. Call Hierarchy
+## 5. Protocol / Implementation Mapping
+## 6. Dependency Injection Mapping
+## 7. Runtime Coupling Risks
+## 8. Safe vs Risky Change Surface
+## 9. Open Questions
+## 10. Plan Blockers
+""",
+    },
     "spec.from-discovery": {
         "stage": "spec",
         "required_vars": ["task"],
