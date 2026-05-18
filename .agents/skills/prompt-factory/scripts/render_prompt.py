@@ -15,7 +15,7 @@ from template_store import COMMON_BLOCKS, TEMPLATES
 
 PLACEHOLDER_PATTERN = re.compile(r"\{\{([A-Za-z0-9_.-]+)\}\}")
 DEFAULT_MODEL = "gpt-5.4"
-FIXED_OUTPUT_FILE = "compiled-prompt.txt"
+FIXED_OUTPUT_RELATIVE_PATH = Path("ai") / "compiled-prompt.txt"
 
 
 def parse_vars(raw_items: list[str]) -> dict[str, str]:
@@ -188,6 +188,24 @@ def shutil_which(binary: str) -> bool:
     return False
 
 
+def resolve_worktree_root() -> Path:
+    override = os.environ.get("PROMPT_FACTORY_WORKTREE", "").strip()
+    if override:
+        return Path(override).expanduser().resolve()
+
+    completed = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        check=False,
+    )
+    if completed.returncode == 0:
+        return Path(completed.stdout.strip()).resolve()
+
+    return Path.cwd().resolve()
+
+
 def render(template_id: str, variables: dict[str, str]) -> str:
     if template_id not in TEMPLATES:
         raise KeyError(f"Unknown template_id: {template_id}")
@@ -294,7 +312,7 @@ def main() -> int:
 
         compiled = improved_prompt
 
-    output_path = Path(FIXED_OUTPUT_FILE)
+    output_path = resolve_worktree_root() / FIXED_OUTPUT_RELATIVE_PATH
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(compiled, encoding="utf-8")
     print(f"saved: {output_path}")
