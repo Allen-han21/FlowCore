@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jira Operator"
+  short_description: "Jira 통합 운영 스킬 (API-first, 1Password batch, optional MCP/Claude bridge)"
+  default_prompt: "Use $jira-operator for Jira issue verification, batch fetch, ADF description update, child task creation, and status/comment operations. Prefer API-first scripts; use Claude MCP only when available."
