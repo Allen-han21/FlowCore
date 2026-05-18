@@ -1,6 +1,6 @@
 ---
 name: prompt-factory
-description: Generate standardized prompts for plan/implement/review/advisory/reconcile/git stages using reusable template IDs and variable substitution. Use when a team needs consistent workflow prompts (for Codex, Claude, or Gemini), strict role boundaries, minimal-scope instructions, and artifact-centric outputs such as ai/plan.md, ai/review.md, and ai/gemini-review.md.
+description: Generate standardized prompts for discover/spec/plan/implement/review/advisory/reconcile/git stages using reusable template IDs and variable substitution. Use when a team needs consistent workflow prompts (for Codex, Claude, or Gemini), strict role boundaries, minimal-scope instructions, and artifact-centric outputs such as ai/discovery.md, ai/spec.md, ai/plan.md, ai/review.md, and ai/gemini-review.md.
 ---
 
 # Prompt Factory
@@ -8,7 +8,10 @@ description: Generate standardized prompts for plan/implement/review/advisory/re
 ## Overview
 
 Use this skill to create high-consistency prompts from template IDs instead of manually writing long prompts.
-It standardizes role boundaries (plan/implement/review/git), output artifacts, and "do-not-run" constraints.
+It standardizes role boundaries (discover/spec/plan/implement/review/git), output artifacts, and "do-not-run" constraints.
+
+Recommended workflow for short natural-language requests:
+- `discover.*` -> `spec.*` -> `plan.*` -> `implement.*` -> `review.*`
 
 ## Workflow
 
@@ -56,6 +59,7 @@ python3 scripts/render_prompt.py \
 ## Template Groups
 
 - Planning: `plan.*`
+- Discovery/Spec: `discover.*`, `spec.*`
 - Implementation: `implement.*`
 - Review: `review.*`
 - Advisory review: `advisory.*`
@@ -70,6 +74,7 @@ Detailed content and placeholders are in `references/template-catalog.md`.
 - Keep technical identifiers in English.
 - Enforce minimal blast radius and no scope expansion unless explicitly requested.
 - Do not include runtime/build command execution unless the template explicitly allows it.
+- In discovery/spec stages, do not implement code and do not finalize architecture plan.
 - Improvement mode must preserve required sections and safety guards; otherwise fallback.
 
 ## Resources

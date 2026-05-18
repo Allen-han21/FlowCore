@@ -3,6 +3,7 @@
 ## Common Blocks
 
 - `COMMON_USE`: `AGENTS.md`, 기존 패턴, 현재 아키텍처
+- `COMMON_DISCOVER_RULES`: discovery 단계의 비구현/비추측/열린 질문 규칙
 - `COMMON_NO_RUN`: build/test/simulator/xcodebuild/fastlane/runtime 실행 금지
 - `COMMON_IMPLEMENT_RULES`: minimal scope, no unrelated refactor, no redesign
 - `COMMON_REVIEW_CLASSIFICATION`: BLOCKING / SHOULD FIX / OPTIONAL
@@ -10,8 +11,15 @@
 
 ## Template IDs
 
+### Discover / Spec
+
+- `discover.general` (required: `task`)
+- `discover.ios-cache` (required: `task`)
+- `spec.from-discovery` (required: `task`)
+
 ### Plan
 
+- `plan.from-discovery` (required: `task`)
 - `plan.feature` (required: `task`)
 - `plan.bug` (required: `task`)
 - `plan.crash` (required: `crash_symptom`, optional: `crash_context`)
@@ -46,6 +54,18 @@
 
 ```bash
 python3 scripts/list_templates.py
+```
+
+```bash
+python3 scripts/render_prompt.py \
+  --template-id discover.general \
+  --var task="iOS 앱 URL 캐시로 안정성 향상"
+```
+
+```bash
+python3 scripts/render_prompt.py \
+  --template-id spec.from-discovery \
+  --var task="iOS 앱 URL 캐시로 안정성 향상"
 ```
 
 ```bash

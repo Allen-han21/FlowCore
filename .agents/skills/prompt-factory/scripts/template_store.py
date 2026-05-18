@@ -6,6 +6,13 @@ COMMON_BLOCKS = {
 - AGENTS.md
 - existing repository patterns
 - current project architecture""",
+    "COMMON_DISCOVER_RULES": """Discovery rules:
+- do not implement code
+- do not modify files
+- do not create final architecture plan yet
+- do not infer missing requirements as confirmed facts
+- separate confirmed facts vs inferred assumptions
+- list open questions explicitly""",
     "COMMON_NO_RUN": """Do not run:
 - builds
 - compile checks
@@ -38,6 +45,166 @@ Do not use BLOCKING.""",
 }
 
 TEMPLATES = {
+    "discover.general": {
+        "stage": "discover",
+        "required_vars": ["task"],
+        "body": """Create ai/discovery.md in Korean.
+
+Task:
+- {{task}}
+
+Act as discovery analyst only.
+
+{{COMMON_USE}}
+{{COMMON_DISCOVER_RULES}}
+{{COMMON_NO_RUN}}
+
+Investigate:
+1. request summary
+2. confirmed facts from repository context
+3. inferred assumptions (label as assumptions)
+4. open questions before specification/planning
+5. existing architecture map related to task
+6. related code paths
+7. existing similar patterns
+8. runtime/lifecycle flow related to task
+9. risk areas (runtime, regression, data consistency)
+10. scope boundary (in-scope / out-of-scope)
+11. candidate files to inspect next
+12. recommended next step (spec or direct plan) with rationale
+
+Output format in ai/discovery.md:
+## 1. Request Summary
+## 2. Confirmed Facts
+## 3. Inferred Assumptions
+## 4. Open Questions
+## 5. Existing Architecture Map
+## 6. Related Code Paths
+## 7. Existing Similar Patterns
+## 8. Runtime Flow
+## 9. Risk Areas
+## 10. Scope Boundary
+## 11. Candidate Files
+## 12. Recommended Next Step
+""",
+    },
+    "discover.ios-cache": {
+        "stage": "discover",
+        "required_vars": ["task"],
+        "body": """Create ai/discovery.md in Korean.
+
+Task:
+- {{task}}
+
+Act as discovery analyst only for iOS networking/cache context.
+
+{{COMMON_USE}}
+{{COMMON_DISCOVER_RULES}}
+{{COMMON_NO_RUN}}
+
+Investigate:
+1. current networking layer and boundaries
+2. URLSession / Alamofire / Moya / Rx networking usage
+3. existing cache policy and cache invalidation behavior
+4. existing offline handling and retry/fallback flow
+5. repository/service-level error handling behavior
+6. screens or user flows likely affected
+7. whether URLCache is already configured and where
+8. whether target API responses are cacheable
+9. stale data risk and consistency risk
+10. security/privacy risk around cached payloads
+11. candidate files to inspect next
+12. open questions required before spec/plan
+
+Output format in ai/discovery.md:
+## 1. Request Summary
+## 2. Confirmed Facts
+## 3. Inferred Assumptions
+## 4. Open Questions
+## 5. Existing Architecture Map
+## 6. Related Code Paths
+## 7. Existing Similar Patterns
+## 8. Runtime Flow
+## 9. Risk Areas
+## 10. Scope Boundary
+## 11. Candidate Files
+## 12. Recommended Next Step
+""",
+    },
+    "spec.from-discovery": {
+        "stage": "spec",
+        "required_vars": ["task"],
+        "body": """Create ai/spec.md in Korean based on ai/discovery.md.
+
+Task:
+- {{task}}
+
+Read:
+- ai/discovery.md
+- AGENTS.md
+- existing repository patterns
+
+Act as spec author only.
+
+Do not implement code.
+Do not modify product/source files.
+Do not create implementation plan in this step.
+{{COMMON_NO_RUN}}
+
+The spec must include:
+1. problem statement
+2. goals
+3. non-goals
+4. target user/runtime scenarios
+5. functional requirements
+6. non-functional requirements
+7. constraints and assumptions
+8. acceptance criteria
+9. validation approach (human/runtime)
+10. unresolved questions to settle before planning
+
+If ai/discovery.md has unresolved blockers, keep them explicit.
+Do not fill missing facts with speculation.""",
+    },
+    "plan.from-discovery": {
+        "stage": "plan",
+        "required_vars": ["task"],
+        "body": """Create ai/plan.md.
+
+Task:
+- {{task}}
+
+Read first:
+- ai/discovery.md
+- ai/spec.md if present
+- AGENTS.md
+- existing repository patterns
+
+Act as architect only.
+
+Do not implement code.
+Do not modify files.
+{{COMMON_NO_RUN}}
+
+Use discovery/spec as the source of truth for scope.
+
+The plan must include:
+1. problem summary
+2. root cause analysis
+3. files to inspect
+4. files to modify
+5. implementation steps
+6. edge cases
+7. test strategy
+8. runtime validation steps
+9. risks
+10. rollback considerations
+11. open questions carried from discovery/spec
+
+Keep the scope minimal.
+Avoid unnecessary refactoring.
+Preserve existing architecture.""",
+    },
     "plan.feature": {
         "stage": "plan",
         "required_vars": ["task"],
@@ -660,4 +827,3 @@ After commit:
 - explain committed scope""",
     },
 }
-
