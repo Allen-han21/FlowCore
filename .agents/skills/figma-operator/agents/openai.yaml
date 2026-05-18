@@ -1,0 +1,4 @@
+interface:
+  display_name: "Figma Operator"
+  short_description: "Claude Figma MCP 직접 사용 또는 claude -p 브리지"
+  default_prompt: "Use $figma-operator for Figma tasks. In non-Claude agents, call scripts/run_claude_figma_task.sh which delegates to claude -p --permission-mode bypassPermissions."
