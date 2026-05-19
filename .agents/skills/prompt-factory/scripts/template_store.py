@@ -870,40 +870,106 @@ After implementation:
     "review.feature": {
         "stage": "review",
         "required_vars": [],
-        "body": """Review current git diff against ai/plan.md.
+        "body": """Read:
+- ai/discovery.md
+- ai/spec.md
+- ai/plan.md
+- AGENTS.md
+
+Review current git diff.
 Write ai/review.md in Korean.
 
 Review responsibilities:
-- detect architecture drift
-- detect unintended side effects
-- detect unnecessary complexity
-- verify repository conventions
-- verify scope discipline
-- verify test coverage adequacy
+- verify implementation follows runtime/spec behavior defined in ai/spec.md
+- verify known risks and assumptions from ai/discovery.md are preserved safely
+- verify ai/plan.md implementation remains aligned with ai/spec.md
+- verify architecture drift and unintended side effects are absent
+- verify regression risk and minimal blast radius
+- verify no unrelated refactors or scope expansion
+- verify runtime behavior outside target path is preserved
+- verify existing architecture and repository conventions are preserved
+- verify sequential PR integrity if applicable
+- verify UIKit-only direction if applicable
+
+Review focus:
+- correctness
+- runtime safety
+- lifecycle consistency
+- async behavior consistency
+- cache/state invalidation consistency
+- rendering consistency
+- scope discipline
+- maintainability
 
 {{COMMON_REVIEW_CLASSIFICATION}}
 
-Focus on:
-- correctness
-- maintainability
-- runtime risk
-- implementation consistency
+Treat as BLOCKING when:
+- ai/spec.md runtime contract is violated
+- known runtime risk is introduced
+- architecture drift occurs
+- unintended scope expansion exists
+- regression risk is high
+- runtime consistency is broken
 
-Do not rewrite implementation unless critical.""",
+Do not:
+- redesign architecture
+- request speculative refactors
+- suggest unnecessary abstraction
+- expand implementation scope unnecessarily
+
+{{COMMON_NO_RUN}}
+
+Human performs runtime/build validation separately.""",
     },
     "review.bug": {
         "stage": "review",
         "required_vars": [],
-        "body": """Review current git diff against ai/plan.md.
+        "body": """Read:
+- ai/discovery.md
+- ai/spec.md
+- ai/plan.md
+- AGENTS.md
+
+Review current git diff.
 Write ai/review.md in Korean.
 
 Review responsibilities:
 - verify the bug root cause from ai/plan.md is actually addressed
+- verify implementation follows runtime/spec behavior defined in ai/spec.md
+- verify known risks and assumptions from ai/discovery.md are preserved safely
+- verify ai/plan.md implementation remains aligned with ai/spec.md
 - verify regression risk and minimal blast radius
 - verify no unrelated refactors or scope expansion
 - verify runtime behavior outside target path is preserved
+- verify existing architecture and repository conventions are preserved
+- verify sequential PR integrity if applicable
+- verify UIKit-only direction if applicable
+
+Review focus:
+- correctness
+- runtime safety
+- lifecycle consistency
+- async behavior consistency
+- cache/state invalidation consistency
+- rendering consistency
+- scope discipline
+- maintainability
 
 {{COMMON_REVIEW_CLASSIFICATION}}
+
+Treat as BLOCKING when:
+- ai/spec.md runtime contract is violated
+- known runtime risk is introduced
+- architecture drift occurs
+- unintended scope expansion exists
+- regression risk is high
+- runtime consistency is broken
+
+Do not:
+- redesign architecture
+- request speculative refactors
+- suggest unnecessary abstraction
+- expand implementation scope unnecessarily
 
 {{COMMON_NO_RUN}}
 
@@ -912,16 +978,56 @@ Human performs runtime/build validation separately.""",
     "review.crash": {
         "stage": "review",
         "required_vars": [],
-        "body": """Review current git diff against ai/plan.md.
+        "body": """Read:
+- ai/discovery.md
+- ai/spec.md
+- ai/plan.md
+- AGENTS.md
+
+Review current git diff.
 Write ai/review.md in Korean.
 
 Review responsibilities:
-- verify actual crash root cause is addressed
+- verify actual crash root cause from ai/plan.md is addressed
 - detect crash masking or symptom-only fixes
+- verify implementation follows runtime/spec behavior defined in ai/spec.md
+- verify known crash/runtime risks from ai/discovery.md are preserved safely
+- verify ai/plan.md implementation remains aligned with ai/spec.md
 - verify lifecycle/thread/async safety
-- verify minimal blast radius
+- verify regression risk and minimal blast radius
+- verify no unrelated refactors or scope expansion
+- verify runtime behavior outside crash target path is preserved
+- verify existing architecture and repository conventions are preserved
+- verify sequential PR integrity if applicable
+- verify UIKit-only direction if applicable
+
+Review focus:
+- correctness
+- runtime safety
+- lifecycle consistency
+- async behavior consistency
+- cache/state invalidation consistency
+- rendering consistency
+- scope discipline
+- maintainability
 
 {{COMMON_REVIEW_CLASSIFICATION}}
+
+Treat as BLOCKING when:
+- ai/spec.md runtime contract is violated
+- known runtime risk is introduced
+- crash root cause remains unresolved
+- crash masking or symptom-only handling is detected
+- architecture drift occurs
+- unintended scope expansion exists
+- regression risk is high
+- runtime consistency is broken
+
+Do not:
+- redesign architecture
+- request speculative refactors
+- suggest unnecessary abstraction
+- expand implementation scope unnecessarily
 
 {{COMMON_NO_RUN}}
 
