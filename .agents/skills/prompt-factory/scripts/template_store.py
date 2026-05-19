@@ -621,6 +621,64 @@ The plan must include:
 16. rollback considerations
 17. commit boundary per item""",
     },
+    "ticket.from-plan": {
+        "stage": "ticket",
+        "required_vars": ["task"],
+        "body": """Create ai/ticket.md in Korean.
+
+Task:
+- {{task}}
+
+Read first:
+- ai/discovery.md if present
+- ai/spec.md if present
+- ai/plan.md if present
+- AGENTS.md
+- existing repository patterns
+
+Act as collaboration artifact author only.
+
+Do not implement code.
+Do not modify product/source files.
+Do not create new architecture/design decisions in this step.
+{{COMMON_NO_RUN}}
+
+Generate a ticket draft for execution handoff.
+Use already confirmed scope from discovery/spec/plan.
+If required information is missing, keep it in Open Questions instead of guessing.
+
+Output format in ai/ticket.md:
+# Ticket Draft
+
+## Title
+
+## Problem Summary
+
+## Background
+
+## Expected Behavior
+
+## Current Behavior
+
+## Scope
+
+## Non-Goals
+
+## Runtime Risks
+
+## Acceptance Criteria
+
+## Validation Checklist
+
+## Rollout / Rollback Notes
+
+## Related Files / Areas
+
+## Sequential PR Impact
+
+## Open Questions
+""",
+    },
     "implement.feature": {
         "stage": "implement",
         "required_vars": ["task"],
@@ -650,21 +708,52 @@ Do not perform review.""",
     "implement.bug": {
         "stage": "implement",
         "required_vars": [],
-        "body": """Read ai/plan.md and implement the bug fix exactly.
-
-Use:
+        "body": """Read:
+- ai/discovery.md
+- ai/spec.md
+- ai/plan.md
 - AGENTS.md
 - .claude/rules
+
+Task:
+Implement the planned bug fix exactly as defined in ai/plan.md.
+
+Implementation priority:
+1. ai/spec.md
+2. ai/plan.md
+3. ai/discovery.md
+
+Use:
 - existing repository conventions
+- existing architecture
+- existing runtime patterns
 
 {{COMMON_IMPLEMENT_RULES}}
 - fix only the bug described in ai/plan.md
+- follow runtime behavior and constraints defined in ai/spec.md
 - address the suspected root cause from ai/plan.md
+- preserve runtime behavior outside the target scope
+
+If:
+- ai/plan.md conflicts with ai/spec.md
+- ai/discovery.md reveals hidden runtime risk
+- implementation requires scope expansion
+then:
+- stop and report the inconsistency instead of improvising
+
+Do not:
+- reinterpret product/runtime policy
+- introduce speculative optimization
+- unify architecture
+- replace existing cache/network layers broadly
+- add unrelated cleanup
+- modify unrelated runtime flows
 
 Requirements:
 - summarize changed files
 - explain any deviation from ai/plan.md
 - explain why the fix remains minimal and safe
+- list any unresolved runtime risks or open questions
 
 {{COMMON_NO_RUN}}
 

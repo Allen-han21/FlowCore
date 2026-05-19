@@ -1,6 +1,6 @@
 ---
 name: prompt-factory
-description: Generate standardized prompts for discover/spec/plan/implement/review/advisory/reconcile/git stages using reusable template IDs and variable substitution. Use when a team needs consistent workflow prompts (for Codex, Claude, or Gemini), strict role boundaries, minimal-scope instructions, and artifact-centric outputs such as ai/discovery.md, ai/spec.md, ai/plan.md, ai/review.md, and ai/gemini-review.md.
+description: Generate standardized prompts for discover/spec/plan/ticket/implement/review/advisory/reconcile/git stages using reusable template IDs and variable substitution. Use when a team needs consistent workflow prompts (for Codex, Claude, or Gemini), strict role boundaries, minimal-scope instructions, and artifact-centric outputs such as ai/discovery.md, ai/spec.md, ai/plan.md, ai/ticket.md, ai/review.md, and ai/gemini-review.md.
 ---
 
 # Prompt Factory
@@ -8,10 +8,10 @@ description: Generate standardized prompts for discover/spec/plan/implement/revi
 ## Overview
 
 Use this skill to create high-consistency prompts from template IDs instead of manually writing long prompts.
-It standardizes role boundaries (discover/spec/plan/implement/review/git), output artifacts, and "do-not-run" constraints.
+It standardizes role boundaries (discover/spec/plan/ticket/implement/review/git), output artifacts, and "do-not-run" constraints.
 
 Recommended workflow for short natural-language requests:
-- `discover.*` -> `spec.*` -> `plan.*` -> `implement.*` -> `review.*`
+- `discover.*` -> `spec.*` -> `plan.*` -> `ticket.*` -> `implement.*` -> `review.*`
 
 For semantic risk-heavy tasks, run symbol pass before planning:
 - `discover.symbols` -> `spec.*` -> `plan.*`
@@ -48,7 +48,7 @@ python3 scripts/route_prompt.py \
   "iOS 앱 URL 캐시로 안정성 향상 - 네트워크 불안정 상황에서도 기존 데이터로 안정적인 서비스 제공"
 ```
 
-- Router priority: `DISCOVER` -> `REVIEW` -> `IMPLEMENT` -> `SPEC` -> `PLAN`
+- Router priority: `DISCOVER` -> `REVIEW` -> `TICKET` -> `IMPLEMENT` -> `SPEC` -> `PLAN`
 - If any DISCOVER gate condition matches, router forces `discover.*` first
 - Router prints `intent`, `template_id`, and `reason`, then renders prompt automatically
 
@@ -97,6 +97,7 @@ python3 scripts/render_prompt.py \
 
 - Planning: `plan.*`
 - Discovery/Spec: `discover.*`, `spec.*`
+- Ticket: `ticket.*`
 - Implementation: `implement.*`
 - Review: `review.*`
 - Advisory review: `advisory.*`

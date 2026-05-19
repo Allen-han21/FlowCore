@@ -72,6 +72,7 @@ ABSTRACT_GOAL_KEYWORDS = [
 ]
 
 REVIEW_KEYWORDS = ["리뷰", "검토", "review", "코드리뷰", "code review", "pr 리뷰", "pr review"]
+TICKET_KEYWORDS = ["티켓", "ticket", "jira 생성", "jira 발행", "이슈 생성", "issue draft", "ticket draft"]
 IMPLEMENT_KEYWORDS = ["구현", "수정", "개발", "고쳐", "fix", "implement"]
 SPEC_KEYWORDS = ["스펙", "spec", "명세", "요구사항"]
 PLAN_KEYWORDS = ["계획", "설계", "plan"]
@@ -147,6 +148,12 @@ def route(task: str) -> RoutingDecision:
     reasons: list[str] = []
     matched_rules: list[int] = []
 
+    explicit_ticket_request = contains_any(text, TICKET_KEYWORDS) and contains_any(
+        text, ["생성", "작성", "발행", "draft", "초안"]
+    )
+    if explicit_ticket_request:
+        return RoutingDecision("TICKET", "ticket.from-plan", ["명시적 티켓 초안/생성 요청"], [])
+
     concrete_anchor = any(
         [
             has_target_file(text),
@@ -210,9 +217,11 @@ def route(task: str) -> RoutingDecision:
         )
 
     # Priority order when discover gate is not matched:
-    # DISCOVER > REVIEW > IMPLEMENT > SPEC > PLAN
+    # DISCOVER > REVIEW > TICKET > IMPLEMENT > SPEC > PLAN
     if contains_any(text, REVIEW_KEYWORDS):
         return RoutingDecision("REVIEW", "review.feature", ["리뷰/검토 의도 감지"], [])
+    if contains_any(text, TICKET_KEYWORDS):
+        return RoutingDecision("TICKET", "ticket.from-plan", ["티켓/협업 실행 artifact 의도 감지"], [])
     if contains_any(text, IMPLEMENT_KEYWORDS):
         return RoutingDecision("IMPLEMENT", "implement.feature", ["구현/수정 의도 감지"], [])
     if contains_any(text, SPEC_KEYWORDS):
@@ -257,7 +266,7 @@ def main() -> int:
     command = [sys.executable, str(script_dir / "render_prompt.py"), "--template-id", decision.template_id]
 
     # Templates that require task var.
-    if decision.template_id.startswith(("discover.", "plan.", "spec.", "implement.")):
+    if decision.template_id.startswith(("discover.", "plan.", "spec.", "ticket.", "implement.")):
         command.extend(["--var", f"task={args.task}"])
 
     completed = subprocess.run(command, text=True, check=False, cwd=script_dir.parent.parent.parent.parent)

@@ -56,6 +56,10 @@
 - `plan.bug-ui` (required: `task`, `items`, `base_branch`, `working_branch`)
 - `plan.redesign` (required: `task`, `items`, `context`)
 
+### Ticket
+
+- `ticket.from-plan` (required: `task`)
+
 ### Implement
 
 - `implement.feature` (required: `task`)
@@ -119,6 +123,12 @@ python3 scripts/render_prompt.py \
   --var task="출석부 삭제 팝업 문구 수정" \
   --improve \
   --print-improve-report
+```
+
+```bash
+python3 scripts/render_prompt.py \
+  --template-id ticket.from-plan \
+  --var task="iOS 앱 URL 캐시 안정성 향상 협업 티켓 초안 작성"
 ```
 
 ```bash
