@@ -12,7 +12,31 @@ COMMON_BLOCKS = {
 - do not create final architecture plan yet
 - do not infer missing requirements as confirmed facts
 - separate confirmed facts vs inferred assumptions
-- list open questions explicitly""",
+- list open questions explicitly
+- perform Product Context precheck before asking user:
+  - search repo/doc context for Slack request links, Jira tickets, wiki/PRD links, Figma links, screenshot assets
+  - search related conversations from the last 2 weeks first (Slack threads, ticket comments, design discussion logs)
+  - if accessible, include evidence in Product Context as confirmed facts
+  - if inaccessible (missing link/permission), record as blocked with reason
+  - include what was checked first (patterns/paths) before requesting additional input""",
+    "COMMON_DISCOVER_GATE": """DISCOVER gate (must check before planning):
+- If any condition below is true, DISCOVER must run first.
+1. large existing project and broad impact surface
+2. request is only 1-3 lines of natural language
+3. related files/screens/domain are not explicit
+4. server/API/cache/auth/security/offline/performance are involved
+5. existing architecture must be understood first
+6. abstract goals like stability/performance/structure/cache improvement
+7. likely multi-layer changes
+8. external context may be required (Slack/Jira/wiki/PRD/Figma/screenshot)
+9. wrong design can significantly increase blast radius
+10. user states desired improvement but not concrete change points
+
+If any condition matches:
+- do not finalize plan directly
+- first create ai/discovery.md with discover.* template
+- then create ai/spec.md with spec.from-discovery
+- then continue with plan.from-discovery""",
     "COMMON_NO_RUN": """Do not run:
 - builds
 - compile checks
@@ -64,24 +88,34 @@ Investigate:
 2. confirmed facts from repository context
 3. inferred assumptions (label as assumptions)
 4. open questions before specification/planning
-5. existing architecture map related to task
-6. related code paths
-7. existing similar patterns
-8. runtime/lifecycle flow related to task
-9. risk areas (runtime, regression, data consistency)
-10. scope boundary (in-scope / out-of-scope)
-11. candidate files to inspect next
+5. Product Context (Slack/Jira/wiki/PRD/Figma/QA evidence with precheck logs)
+6. Code Context:
+   - related files
+   - existing implementation patterns
+   - similar features
+   - current runtime flow
+   - principle: code search finds visible strings, LSP finds semantic connections
+7. Symbol / LSP Context:
+   - definition locations
+   - reference locations
+   - call hierarchy
+   - protocol/implementation mapping
+   - dependency injection mapping
+8. risk areas (runtime, regression, data consistency)
+9. scope boundary (in-scope / out-of-scope)
+10. candidate files to inspect next
+11. plan blockers
 12. recommended next step (spec or direct plan) with rationale
 
 Output format in ai/discovery.md:
 ## 1. Request Summary
-## 2. Confirmed Facts
-## 3. Inferred Assumptions
-## 4. Open Questions
-## 5. Existing Architecture Map
-## 6. Related Code Paths
-## 7. Existing Similar Patterns
-## 8. Runtime Flow
+## 2. Product Context
+## 3. Code Context
+## 4. Symbol / LSP Context
+## 5. Confirmed Facts
+## 6. Inferred Assumptions
+## 7. Open Questions
+## 8. Plan Blockers
 ## 9. Risk Areas
 ## 10. Scope Boundary
 ## 11. Candidate Files
@@ -113,18 +147,30 @@ Investigate:
 8. whether target API responses are cacheable
 9. stale data risk and consistency risk
 10. security/privacy risk around cached payloads
-11. candidate files to inspect next
-12. open questions required before spec/plan
+11. Code Context:
+   - related files / patterns / similar features / runtime flow
+   - principle: code search finds visible strings, LSP finds semantic connections
+12. Symbol / LSP Context:
+   - definition/reference/call hierarchy
+   - protocol implementations count
+   - dependency injection mapping
+13. candidate files to inspect next
+14. open questions required before spec/plan
+15. Product Context precheck logs:
+   - related conversations found in last 2 weeks
+   - what was searched first for Slack/Jira/wiki/PRD/Figma/screenshot evidence
+   - which evidence was confirmed
+   - what is blocked and why
 
 Output format in ai/discovery.md:
 ## 1. Request Summary
-## 2. Confirmed Facts
-## 3. Inferred Assumptions
-## 4. Open Questions
-## 5. Existing Architecture Map
-## 6. Related Code Paths
-## 7. Existing Similar Patterns
-## 8. Runtime Flow
+## 2. Product Context
+## 3. Code Context
+## 4. Symbol / LSP Context
+## 5. Confirmed Facts
+## 6. Inferred Assumptions
+## 7. Open Questions
+## 8. Plan Blockers
 ## 9. Risk Areas
 ## 10. Scope Boundary
 ## 11. Candidate Files
@@ -159,6 +205,18 @@ Investigate with symbol/LSP-first approach:
 8. cross-module dependency edges
 9. symbols safe-to-change vs risky-to-change
 10. open questions and plan blockers from symbol graph
+11. detect:
+    - where this function is actually called
+    - how many protocol implementations exist
+    - where ViewController extensions are connected
+    - whether a type is safe to delete
+    - whether override/delegate/selector routes exist
+    - whether ObjC selector string references exist
+12. Product Context precheck logs:
+    - related conversations found in last 2 weeks
+    - what was searched first for Slack/Jira/wiki/PRD/Figma/screenshot evidence
+    - which evidence was confirmed
+    - what is blocked and why
 
 Evidence policy:
 - Prefer semantic tooling (LSP/symbol index) over plain text grep where possible.
@@ -263,6 +321,7 @@ Task:
 Act as architect only.
 
 {{COMMON_USE}}
+{{COMMON_DISCOVER_GATE}}
 
 Do not implement code.
 
@@ -294,6 +353,7 @@ Act as architect only.
 
 {{COMMON_USE}}
 - existing reaction workflow and stacked PR structure if relevant
+{{COMMON_DISCOVER_GATE}}
 
 Do not implement code.
 
@@ -339,6 +399,7 @@ Act as architect only.
 
 {{COMMON_USE}}
 - existing reaction workflow and stacked PR structure if relevant
+{{COMMON_DISCOVER_GATE}}
 
 Do not implement code.
 
@@ -450,6 +511,7 @@ Act as architect and workflow planner only.
 
 {{COMMON_USE}}
 - existing reaction workflow and stacked PR structure if relevant
+{{COMMON_DISCOVER_GATE}}
 
 Do not implement code.
 Do not modify files.
@@ -491,6 +553,7 @@ Act as architect and workflow planner only.
 
 {{COMMON_USE}}
 - existing reaction workflow and stacked PR structure if relevant
+{{COMMON_DISCOVER_GATE}}
 
 Do not implement code.
 Do not modify files.
@@ -533,6 +596,7 @@ Act as architect only.
 - previous implementation diff if available
 - ai/review.md if relevant
 - ai/gemini-review.md if relevant
+{{COMMON_DISCOVER_GATE}}
 
 Do not implement code.
 Do not modify files.
