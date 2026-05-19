@@ -26,6 +26,7 @@ allowed-tools: Bash(git:*), Bash(gemini *), Read, Grep, Glob, Agent
 ## Light 모드
 
 Codex/Claude 단독으로 **Critical/High 이슈만** 빠르게 찾습니다. Medium/Low는 무시.
+리뷰는 반드시 Codex, Claude 고성능 Agent를 실행한다.
 
 ### Phase 2 (Light): Codex/Claude 단독 리뷰
 
