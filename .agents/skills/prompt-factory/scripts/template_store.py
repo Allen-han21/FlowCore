@@ -16,6 +16,8 @@ COMMON_BLOCKS = {
 - perform Product Context precheck before asking user:
   - search repo/doc context for Slack request links, Jira tickets, wiki/PRD links, Figma links, screenshot assets
   - search related conversations from the last 2 weeks first (Slack threads, ticket comments, design discussion logs)
+  - if Slack link lookup is needed, read the full thread (not only the parent message)
+  - if thread/messages contain URL links or attached files, extract and verify those artifacts as evidence
   - if accessible, include evidence in Product Context as confirmed facts
   - if inaccessible (missing link/permission), record as blocked with reason
   - include what was checked first (patterns/paths) before requesting additional input""",
@@ -158,6 +160,8 @@ Investigate:
 14. open questions required before spec/plan
 15. Product Context precheck logs:
    - related conversations found in last 2 weeks
+   - Slack thread lookup result (message + replies)
+   - extracted URLs/files from conversation and verification status
    - what was searched first for Slack/Jira/wiki/PRD/Figma/screenshot evidence
    - which evidence was confirmed
    - what is blocked and why
@@ -214,6 +218,8 @@ Investigate with symbol/LSP-first approach:
     - whether ObjC selector string references exist
 12. Product Context precheck logs:
     - related conversations found in last 2 weeks
+    - Slack thread lookup result (message + replies)
+    - extracted URLs/files from conversation and verification status
     - what was searched first for Slack/Jira/wiki/PRD/Figma/screenshot evidence
     - which evidence was confirmed
     - what is blocked and why

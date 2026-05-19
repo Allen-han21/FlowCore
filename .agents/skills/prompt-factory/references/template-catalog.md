@@ -13,6 +13,8 @@
 
 - 사용자에게 추가 입력을 요청하기 전에 먼저 Slack/Jira/wiki/PRD/Figma/screenshot evidence를 repo/doc context에서 탐색한다.
 - Product Context에서는 최근 2주 관련 대화(Slack thread, Jira comment, design discussion log)를 먼저 찾는다.
+- Slack 링크 조회가 필요하면 해당 message와 thread reply를 함께 조회한다.
+- 대화 내용에 URL 링크/첨부 파일이 있으면 추출 후 실제 artifact를 조회해 확인한다.
 - 접근 가능한 근거는 `Confirmed Facts`로 반영한다.
 - 링크 부재/권한 제한으로 확인 불가한 항목은 `Blocked`로 이유를 명시한다.
 - discovery 산출물에는 "무엇을 먼저 확인했는지(검색 패턴/경로)"를 로그로 남긴다.

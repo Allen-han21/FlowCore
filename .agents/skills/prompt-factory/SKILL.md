@@ -36,6 +36,8 @@ For semantic risk-heavy tasks, run symbol pass before planning:
 
 Product Context precheck 기본 원칙:
 - Slack/Jira/wiki/PRD/Figma/스크린샷 근거를 보기 전에, 최근 2주 관련 대화부터 우선 확인한다.
+- Slack 링크 조회가 필요하면 parent message만 보지 말고 thread reply까지 전체 확인한다.
+- 대화 내 URL 링크/첨부 파일이 있으면 추출해서 해당 artifact까지 조회하고 확인 결과를 기록한다.
 
 ## Workflow
 
