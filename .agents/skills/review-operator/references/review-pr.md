@@ -6,6 +6,10 @@ allowed-tools: Bash(git:*), Bash(gemini *), Read, Grep, Glob, Agent
 
 # Skill: iOS 코드 리뷰 (/review)
 
+## 공통 입력
+
+리뷰 시작 전 프로젝트 루트의 `AGENTS.md`를 반드시 읽고 따른다.
+
 ## 모드 선택 [필수, 최우선]
 
 인자에 모드가 명시되지 않으면 **반드시 사용자에게 먼저 질문**한다:
@@ -35,7 +39,9 @@ Agent(
   description: "code review codex claude light",
   mode: "plan",
   prompt: """
-  iOS 코드 리뷰를 수행하라. review-diff.patch 파일을 읽어라.
+  iOS 코드 리뷰를 수행하라.
+  프로젝트 루트의 AGENTS.md를 반드시 읽고 따른다.
+  review-diff.patch 파일을 읽어라.
 
   [모드: Light — Critical/High만]
   아래 4개 관점에서 **Critical 또는 High 심각도 이슈만** 찾아라.
@@ -193,6 +199,7 @@ Agent(
   mode: "plan",   # 읽기 전용
   prompt: """
   iOS 코드 리뷰를 수행하라.
+  프로젝트 루트의 AGENTS.md를 반드시 읽고 따른다.
   review-diff.patch 파일을 읽고, 아래 4개 관점으로 리뷰하라:
   1. Security  2. Performance  3. Maintainability  4. Dependency
 
