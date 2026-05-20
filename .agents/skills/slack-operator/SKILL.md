@@ -37,25 +37,28 @@ Provide one repeatable entrypoint for Slack context discovery and Slack-ready co
 ### 3) Produce artifact
 
 - Search outputs should include:
-  - date
-  - channel
-  - author
-  - key sentence
-  - permalink
+  - source message: date, channel, author, text, permalink
+  - thread replies: date, channel, author, text, permalink
 - Messaging outputs should be pure mrkdwn with concise structure.
 
 ## Search Guidance
 
-### Recommended query strategy
+### Source + thread lookup policy
 
-1. Start broad keyword query.
-2. Narrow with modifiers:
+Slack 조회의 기본 목표는 "원문 메시지와 그 원문에 달린 thread"를 확인하는 것이다.
+
+1. Slack permalink 또는 message URL이 있으면 검색하지 말고 해당 원문 메시지와 thread만 읽는다.
+2. permalink가 없고 keyword query만 있으면 검색은 원문 후보를 찾기 위한 1회로 제한한다.
+3. 원문 후보를 고른 뒤에는 해당 메시지와 같은 thread만 읽는다.
+4. 최근 유사 대화, 주변 주제, 추가 키워드 재검색은 사용자가 명시적으로 요청한 경우에만 수행한다.
+
+원문 식별에 필요한 경우에만 query modifier를 사용한다.
+
 - `in:channel-name`
 - `from:username`
 - `after:YYYY-MM-DD`
 - `before:YYYY-MM-DD`
 - `"exact phrase"`
-3. Split large questions into multiple focused searches.
 
 ### Useful modifiers
 
@@ -66,6 +69,7 @@ Provide one repeatable entrypoint for Slack context discovery and Slack-ready co
 
 ### Common pitfalls
 
+- Broad keyword search can pull recent similar conversations and slow down lookup. Do not use it after the source message is identified.
 - Slack search does not support boolean operators like `AND/OR/NOT`.
 - Slack search is not fully real-time for just-posted messages.
 - Private/DM search requires proper permission and consent path.
@@ -96,7 +100,7 @@ Search via Claude bridge (non-Claude agents, bypassPermissions):
 
 ```bash
 bash scripts/run_claude_slack_search.sh \
-  --query 'URLCache offline "stale data" after:2026-05-04 before:2026-05-19' \
+  --query 'https://workspace.slack.com/archives/C123/p1711111111111111' \
   --format table
 ```
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "Slack Operator"
-  short_description: "Slack 검색/메시징 통합 스킬 (Claude MCP 직접 또는 claude -p 브리지)"
-  default_prompt: "Use $slack-operator for Slack search or Slack message drafting. In non-Claude agents, use the included claude -p --permission-mode bypassPermissions bridge scripts."
+  short_description: "Slack 원문/thread 조회와 메시징 통합 스킬 (Claude MCP 직접 또는 claude -p 브리지)"
+  default_prompt: "Use $slack-operator for Slack source-message + thread lookup or Slack message drafting. In non-Claude agents, use the included claude -p --permission-mode bypassPermissions bridge scripts."
