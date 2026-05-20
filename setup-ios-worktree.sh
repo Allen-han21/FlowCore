@@ -15,11 +15,9 @@
 #
 set -euo pipefail
 
-PATCH="${TUIST_CACHE_PATCH:-/Users/allen/Downloads/tuist-install-build-cache/tuist-install-build-cache.patch}"
+PATCH="${TUIST_CACHE_PATCH:-$HOME/Downloads/tuist-install-build-cache/tuist-install-build-cache.patch}"
 ECC="${ECC_HOME:-$HOME/.ecc}"
-FLOWCORE="${FLOWCORE_HOME:-$HOME/Dev/Repo/FlowCore}"
 WORKTREE="${1:-$PWD}"
-FLOWCORE_SKILLS_DIR="${FLOWCORE_SKILLS_DIR:-$FLOWCORE/.agents/skills}"
 
 log() { printf '\n\033[1;34m▶\033[0m %s\n' "$*"; }
 ok()  { printf '\033[1;32m✓\033[0m %s\n' "$*"; }
@@ -39,13 +37,13 @@ log "[2/5] AI 워크플로우 디렉토리/파일 생성"
 mkdir -p .codex .claude/agents .claude/commands .claude/rules .claude/skills .codex/skills .gemini .github/workflows ai
 touch AGENTS.md ai/plan.md ai/review.md ai/gemini-review.md ai/compiled-prompt.txt
 
-cp "$FLOWCORE/codex-AGENTS.md"     .codex/AGENTS.md
+cp ~/Dev/Repo/FlowCore/codex-AGENTS.md .codex/AGENTS.md
 ok "AI 워크플로우 구조 생성 완료"
 
 # ── 3. FlowCore 스킬 복사 ─────────────────────────────────
 log "[3/5] FlowCore 스킬 복사"
-cp -R "$FLOWCORE_SKILLS_DIR"/. .claude/skills/
-cp -R "$FLOWCORE_SKILLS_DIR"/. .codex/skills/
+cp -R ~/Dev/Repo/FlowCore/.agents/skills/. .claude/skills/
+cp -R ~/Dev/Repo/FlowCore/.agents/skills/. .codex/skills/
 ok "FlowCore 스킬 복사 완료 (.claude/skills, .codex/skills)"
 
 # ── 4. ECC 자산 복사 ──────────────────────────────────────
