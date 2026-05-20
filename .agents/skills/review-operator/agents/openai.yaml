@@ -1,4 +1,4 @@
 interface:
   display_name: "Review Operator"
   short_description: "현재 diff 리뷰와 PR 리뷰를 분리 실행하는 코드 리뷰 스킬"
-  default_prompt: "Use $review-operator and choose current diff review or PR review."
+  default_prompt: "Use $review-operator. For /review current, read FlowCore docs, inspect the current git diff, and write ai/review.md without code changes or GitHub submission."

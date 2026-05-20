@@ -1,27 +1,61 @@
 # Review Current
 
-현재 작업 diff를 리뷰한다. 리뷰 대상은 로컬 변경 또는 현재 브랜치에서 진행 중인 변경이다.
+`/review current`는 현재 작업 diff를 FlowCore 문서 기준으로 리뷰하고 `ai/review.md`를 작성하는 읽기 중심 자동화다.
+
+이 모드는 GitHub 제출, commit, push, PR 생성, 구현 수정을 수행하지 않는다.
 
 ## Inputs
 
-우선 가능한 범위에서 아래 문서를 읽는다.
+아래 입력을 순서대로 확인한다.
 
-- `ai/discovery.md`
-- `ai/spec.md`
-- `ai/plan.md`
-- `AGENTS.md`
+1. `ai/discovery.md`가 있으면 읽는다.
+2. `ai/spec.md`가 있으면 읽는다.
+3. `ai/plan.md`는 반드시 읽는다.
+4. `AGENTS.md`를 읽는다.
+5. 현재 git 상태와 diff를 확인한다.
 
-파일이 없으면 없는 상태를 간단히 기록하고, 현재 git diff와 주변 코드 컨텍스트를 기준으로 리뷰한다.
+`ai/plan.md`가 없으면 리뷰 기준이 없으므로 일반 코드 리뷰를 진행하지 않는다. 이 경우 `ai/review.md`에 `BLOCKING` 사전조건 실패로 기록하고 중단한다.
+
+`ai/discovery.md`, `ai/spec.md`, `AGENTS.md`가 없으면 `ai/review.md`의 입력 상태에 누락 사실을 기록하고, 남은 입력만으로 리뷰한다.
 
 ## Workflow
 
-1. 현재 git 상태와 diff 범위를 확인한다.
-2. `ai/plan.md`가 있으면 작업 유형을 판정한다.
-3. 작업 유형에 맞는 리뷰 프로필을 적용한다.
-4. 현재 git diff를 리뷰한다.
-5. 결과를 `ai/review.md`에 한국어로 작성한다.
+1. 입력 문서 상태를 확인한다.
+2. `ai/plan.md`에서 구현 범위, out-of-scope, root cause, verification contract를 추출한다.
+3. `ai/spec.md`가 있으면 runtime contract와 expected behavior를 추출한다.
+4. `ai/discovery.md`가 있으면 known risk, 기존 제약, 확인된 원인을 추출한다.
+5. `AGENTS.md`가 있으면 repo-local 실행 규칙과 금지 사항을 추출한다.
+6. 현재 git 상태와 diff 범위를 확인한다.
+7. spec / plan / discovery 기준으로 현재 diff를 리뷰한다.
+8. 결과를 `ai/review.md`에 한국어로 작성한다.
 
 리뷰 중 구현을 직접 수정하지 않는다. Critical 수준의 결함이 있어도 수정 제안까지만 작성한다.
+
+## Git Context
+
+현재 diff 확인에는 아래 정보를 사용한다.
+
+- `git status --short`
+- `git diff --stat`
+- `git diff --cached --stat`
+- `git diff`
+- `git diff --cached`
+
+staged 변경과 unstaged 변경을 모두 리뷰한다. 변경이 없으면 `ai/review.md`에 리뷰 대상 없음으로 기록한다.
+
+## Review Contract
+
+반드시 확인한다.
+
+- `ai/spec.md` runtime contract 준수 여부
+- `ai/plan.md` 구현 범위 준수 여부
+- `ai/discovery.md` known risk 위반 여부
+- root cause 해결 여부
+- scope expansion 여부
+- unrelated refactor 여부
+- runtime behavior 보존 여부
+
+문서가 없는 기준은 추측으로 보완하지 않는다. 누락된 기준은 `Input Status` 또는 `Residual Risk`에 명시한다.
 
 ## Review Profiles
 
@@ -171,6 +205,11 @@ Classify findings as:
 
 리뷰 세션에서는 아래 명령을 실행하지 않는다.
 
+- Claude CLI 자동 구현 실행
+- Gemini 자동 실행
+- commit 자동화
+- PR 생성 자동화
+- GitHub review 제출 자동화
 - builds
 - compile checks
 - tests
@@ -193,41 +232,58 @@ Human performs runtime/build validation separately.
 ```markdown
 # 코드 리뷰 결과
 
+## Input Status
+- `ai/discovery.md`: found | missing
+- `ai/spec.md`: found | missing
+- `ai/plan.md`: found | missing
+- `AGENTS.md`: found | missing
+
 ## 검토 범위
 - 대상: 현재 git diff
 - 기준 문서: ai/discovery.md, ai/spec.md, ai/plan.md, AGENTS.md
+- 변경 파일:
+  - {파일 경로}
+
+## 기준 요약
+- Plan scope: {ai/plan.md에서 확인한 범위}
+- Runtime contract: {ai/spec.md에서 확인한 계약 또는 missing}
+- Known risk: {ai/discovery.md에서 확인한 위험 또는 missing}
+
+## 결론
+- Blocking: {count}
+- Should Fix: {count}
+- Optional: {count}
+- Merge readiness: ready | not ready | blocked by missing input
 
 ## Findings
 
 ### 이슈 1: {한 줄 제목}
 - **위치**: [{파일}:{라인}]
-- **관점**: Security/Performance/Maintainability/Dependency
-- **심각도**: Critical/High/Medium/Low
+- **관점**: Correctness/Runtime Risk/Scope/Architecture/Test/Dependency
+- **심각도**: BLOCKING/SHOULD FIX/OPTIONAL
 
 **현재 상태 (무엇이 문제인가)**
 
-> 현재 코드가 어떻게 동작하는지 설명. 변경된 코드를 인용하며 구체적으로 작성.
-> swift
-> // 문제가 되는 코드 인용
-> 
+현재 코드가 어떻게 동작하는지 설명. 변경된 코드를 필요한 만큼만 짧게 인용한다.
 
 **왜 문제인가**
 
-> 어떤 시나리오에서 어떤 부작용이 발생하는지 구체적으로 설명.
-> 예: "사용자가 A 화면에서 B를 탭했을 때, C 때문에 D가 발생할 수 있습니다."
+어떤 기준 문서와 충돌하는지, 어떤 시나리오에서 어떤 부작용이 발생할 수 있는지 구체적으로 설명한다.
 
 **수정 제안**
 
-> 구체적인 수정 방향과 가능하면 코드 예시 제공.
-> swift
-> // 수정 예시
-> 
+구체적인 수정 방향을 제안한다. 직접 수정하지 않는다.
 
 ---
 
 (이슈 반복)
 
 ---
+
+## Residual Risk
+- 실행하지 않은 검증:
+- 누락된 입력:
+- 사람이 확인해야 할 runtime/UI 항목:
 ```
 
 각 finding에는 다음 내용을 포함한다.
