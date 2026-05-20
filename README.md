@@ -170,6 +170,76 @@ workflow compiler 는:
 
 ---
 
+# Workflow Visualization
+
+FlowCore의 기본 실행 흐름은 계획, 구현, 리뷰, 검증, 배포 준비를 분리합니다.
+
+```mermaid
+flowchart TD
+    A[Request / Issue / Slack Context] --> B[Discover]
+    B --> C[Spec Draft]
+    C --> D[Plan Draft]
+    D --> E{Human approves plan?}
+    E -- No --> D
+    E -- Yes --> F[Implementation]
+    F --> G[Primary Review]
+    G --> H[Advisory Review]
+    H --> I[Reconciliation]
+    I --> J{Blocking issue?}
+    J -- Yes --> D
+    J -- No --> K[Runtime Validation]
+    K --> L{Human approves runtime behavior?}
+    L -- No --> D
+    L -- Yes --> M[Commit]
+    M --> N[PR]
+    N --> O[CI / ECC Gate]
+    O --> P{Human merge approval?}
+    P -- No --> I
+    P -- Yes --> Q[Merge]
+```
+
+## User Scenario
+
+사용자는 workflow gate를 열고 닫는 역할을 맡고, AI는 승인된 구간에서 문서를 읽고 결과 파일을 생성합니다.
+
+```mermaid
+sequenceDiagram
+    actor Human
+    participant FlowCore
+    participant AI as AI Agent
+    participant State as ai/*.md
+    participant Git
+
+    Human->>FlowCore: 작업 요청 입력
+    FlowCore->>AI: discover / spec draft / plan draft 실행
+    AI->>State: discovery.md, spec.md, plan.md 작성
+    FlowCore-->>Human: 계획 검토 요청
+    Human->>FlowCore: 구현 승인 또는 수정 지시
+
+    alt 구현 승인
+        FlowCore->>AI: 승인된 plan 기준 구현 지시
+        AI->>Git: 코드 변경 생성
+        FlowCore->>AI: /review current 실행
+        AI->>State: review.md 작성
+        FlowCore-->>Human: 리뷰 결과와 runtime 확인 요청
+        Human->>FlowCore: 수정 요청 또는 runtime 승인
+    else 구현 미승인
+        FlowCore->>AI: plan/spec 재작성
+        AI->>State: plan.md 또는 spec.md 갱신
+    end
+
+    opt commit / PR / merge 단계
+        Human->>FlowCore: commit 승인
+        FlowCore->>Git: commit 생성
+        Human->>FlowCore: PR 생성 승인
+        FlowCore->>Git: PR 생성
+        Human->>FlowCore: merge 승인
+        FlowCore->>Git: merge
+    end
+```
+
+---
+
 # Review Architecture
 
 FlowCore는 리뷰 역할을 강하게 분리합니다.
