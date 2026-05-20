@@ -6,6 +6,16 @@ COMMON_BLOCKS = {
 - AGENTS.md
 - existing repository patterns
 - current project architecture""",
+    "COMMON_NORMALIZE_RULES": """Context normalize rules:
+- do not implement code
+- do not modify product/source files
+- do not create architecture decisions
+- do not create final implementation plan
+- preserve the original request and source references
+- separate confirmed facts from inferred assumptions
+- separate product expectation from engineering task
+- keep open questions explicit
+- prepare discovery targets without deciding the solution""",
     "COMMON_DISCOVER_RULES": """Discovery rules:
 - do not implement code
 - do not modify files
@@ -36,6 +46,7 @@ COMMON_BLOCKS = {
 
 If any condition matches:
 - do not finalize plan directly
+- create ai/context.md first if raw input is mixed, voice-like, or sourced from Slack/Jira/wiki/PRD/Figma/screenshot
 - first create ai/discovery.md with discover.* template
 - then create ai/spec.md with spec.from-discovery
 - then continue with plan.from-discovery""",
@@ -71,6 +82,36 @@ Do not use BLOCKING.""",
 }
 
 TEMPLATES = {
+    "normalize.context": {
+        "stage": "normalize",
+        "required_vars": ["task"],
+        "body": """Create ai/context.md in Korean.
+
+Raw request:
+- {{task}}
+
+Act as context normalizer only.
+
+{{COMMON_NORMALIZE_RULES}}
+{{COMMON_NO_RUN}}
+
+Normalize Slack/Jira/wiki/PRD/Figma/screenshot/voice-like text into a structured engineering request.
+
+Output format in ai/context.md:
+## 1. Original Request
+## 2. Source / Evidence
+## 3. Product Expectation
+## 4. Engineering Request
+## 5. Confirmed Facts
+## 6. Inferred Assumptions
+## 7. Open Questions
+## 8. Runtime / UX Signals
+## 9. Suggested Discovery Targets
+## 10. Recommended Next Step
+
+Recommended next step should normally be discover.*, not plan.*.
+Do not decide implementation details.""",
+    },
     "discover.general": {
         "stage": "discover",
         "required_vars": ["task"],
@@ -80,6 +121,8 @@ Task:
 - {{task}}
 
 Act as discovery analyst only.
+
+Read ai/context.md first if present.
 
 {{COMMON_USE}}
 {{COMMON_DISCOVER_RULES}}
@@ -133,6 +176,8 @@ Task:
 - {{task}}
 
 Act as discovery analyst only for iOS networking/cache context.
+
+Read ai/context.md first if present.
 
 {{COMMON_USE}}
 {{COMMON_DISCOVER_RULES}}
@@ -190,6 +235,8 @@ Task:
 - {{task}}
 
 Act as symbol/LSP discovery analyst only.
+
+Read ai/context.md first if present.
 
 {{COMMON_USE}}
 {{COMMON_DISCOVER_RULES}}
@@ -251,6 +298,7 @@ Task:
 - {{task}}
 
 Read:
+- ai/context.md if present
 - ai/discovery.md
 - AGENTS.md
 - existing repository patterns
@@ -286,6 +334,7 @@ Task:
 - {{task}}
 
 Read first:
+- ai/context.md if present
 - ai/discovery.md
 - ai/spec.md if present
 - AGENTS.md
@@ -636,6 +685,7 @@ Task:
 - {{task}}
 
 Read first:
+- ai/context.md if present
 - ai/discovery.md if present
 - ai/spec.md if present
 - ai/plan.md if present
@@ -688,7 +738,11 @@ Output format in ai/ticket.md:
     "implement.feature": {
         "stage": "implement",
         "required_vars": ["task"],
-        "body": """Read ai/plan.md and implement exactly.
+        "body": """Read:
+- ai/context.md if present
+- ai/plan.md
+
+Implement exactly according to ai/plan.md.
 
 Task:
 - {{task}}
@@ -715,6 +769,7 @@ Do not perform review.""",
         "stage": "implement",
         "required_vars": [],
         "body": """Read:
+- ai/context.md if present
 - ai/discovery.md
 - ai/spec.md
 - ai/plan.md
@@ -727,7 +782,8 @@ Implement the planned bug fix exactly as defined in ai/plan.md.
 Implementation priority:
 1. ai/spec.md
 2. ai/plan.md
-3. ai/discovery.md
+3. ai/context.md if present
+4. ai/discovery.md
 
 Use:
 - existing repository conventions
@@ -771,6 +827,7 @@ Do not perform review.""",
         "stage": "implement",
         "required_vars": [],
         "body": """Read:
+- ai/context.md if present
 - ai/plan.md
 - AGENTS.md
 - .claude/rules
@@ -804,6 +861,7 @@ After implementation:
         "stage": "implement",
         "required_vars": ["current_item"],
         "body": """Read:
+- ai/context.md if present
 - ai/plan.md
 - AGENTS.md
 - .claude/rules
@@ -835,6 +893,7 @@ After implementation:
         "stage": "implement",
         "required_vars": ["current_item"],
         "body": """Read:
+- ai/context.md if present
 - ai/plan.md
 - AGENTS.md
 - ai/review.md if relevant
@@ -871,6 +930,7 @@ After implementation:
         "stage": "review",
         "required_vars": [],
         "body": """Read:
+- ai/context.md if present
 - ai/discovery.md
 - ai/spec.md
 - ai/plan.md
@@ -881,6 +941,7 @@ Write ai/review.md in Korean.
 
 Review responsibilities:
 - verify implementation follows runtime/spec behavior defined in ai/spec.md
+- verify implementation does not contradict normalized request context in ai/context.md
 - verify known risks and assumptions from ai/discovery.md are preserved safely
 - verify ai/plan.md implementation remains aligned with ai/spec.md
 - verify architecture drift and unintended side effects are absent
@@ -925,6 +986,7 @@ Human performs runtime/build validation separately.""",
         "stage": "review",
         "required_vars": [],
         "body": """Read:
+- ai/context.md if present
 - ai/discovery.md
 - ai/spec.md
 - ai/plan.md
@@ -936,6 +998,7 @@ Write ai/review.md in Korean.
 Review responsibilities:
 - verify the bug root cause from ai/plan.md is actually addressed
 - verify implementation follows runtime/spec behavior defined in ai/spec.md
+- verify implementation does not contradict normalized request context in ai/context.md
 - verify known risks and assumptions from ai/discovery.md are preserved safely
 - verify ai/plan.md implementation remains aligned with ai/spec.md
 - verify regression risk and minimal blast radius
@@ -979,6 +1042,7 @@ Human performs runtime/build validation separately.""",
         "stage": "review",
         "required_vars": [],
         "body": """Read:
+- ai/context.md if present
 - ai/discovery.md
 - ai/spec.md
 - ai/plan.md
@@ -991,6 +1055,7 @@ Review responsibilities:
 - verify actual crash root cause from ai/plan.md is addressed
 - detect crash masking or symptom-only fixes
 - verify implementation follows runtime/spec behavior defined in ai/spec.md
+- verify implementation does not contradict normalized request context in ai/context.md
 - verify known crash/runtime risks from ai/discovery.md are preserved safely
 - verify ai/plan.md implementation remains aligned with ai/spec.md
 - verify lifecycle/thread/async safety
@@ -1078,7 +1143,12 @@ Classify Gemini comments as:
 
 For each decision:
 - explain why the comment is or is not actionable
-- explain runtime/regression implications where relevant""",
+- explain runtime/regression implications where relevant
+
+If any comment is accepted as BLOCKING or merge-blocking:
+- route to Fix Implementation
+- after the fix, return to Primary Review
+- do not route directly back to planning unless the approved plan/spec is invalid or insufficient""",
     },
     "rereview.general": {
         "stage": "rereview",
@@ -1097,6 +1167,40 @@ Update ai/review.md with the final status.
 Write in Korean.
 Do not rewrite implementation.
 {{COMMON_NO_RUN}}""",
+    },
+    "runtime.findings": {
+        "stage": "runtime",
+        "required_vars": [],
+        "body": """Create ai/runtime-findings.md in Korean from human runtime validation feedback.
+
+Read:
+- ai/context.md if present
+- ai/discovery.md if present
+- ai/spec.md
+- ai/plan.md
+- ai/review.md if present
+
+Act as runtime finding triage only.
+
+Do not implement code.
+Do not modify product/source files.
+Do not change the approved plan unless the root cause is unclear.
+{{COMMON_NO_RUN}}
+
+Output format in ai/runtime-findings.md:
+## 1. Runtime Scenario
+## 2. Expected Behavior
+## 3. Actual Behavior
+## 4. Evidence
+## 5. Root Cause Clarity
+## 6. Violated Assumption
+## 7. Scope Impact
+## 8. Recommended Route
+
+Recommended Route must be one of:
+- `discover`: root cause unclear, product/API/lifecycle/cache assumption may be wrong, or scope expansion is required
+- `fix-implementation`: root cause clear and fix remains inside approved plan/spec scope
+- `runtime-retry`: validation evidence is insufficient and no code change is justified yet""",
     },
     "git.commit": {
         "stage": "git",

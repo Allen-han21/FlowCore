@@ -6,14 +6,20 @@ Use this workflow strictly.
 
 # Workflow
 
-1. Codex creates architecture and implementation plan in `ai/plan.md`.
-2. Claude Code implements strictly according to `ai/plan.md`.
-3. Human performs runtime validation and functional verification.
-4. Codex performs primary review in `ai/review.md`.
-5. Gemini performs advisory review only in `ai/gemini-review.md`.
-6. Codex decides which Gemini comments are actionable.
-7. ECC/CI quality gate must pass before merge.
-8. Human performs final approval and merge.
+1. Codex normalizes raw request context in `ai/context.md` when input comes from Slack, Jira, screenshot, voice-like text, or mixed notes.
+2. Codex creates discovery/spec artifacts in `ai/discovery.md` and `ai/spec.md` when context is broad, risky, or unclear.
+3. Codex creates architecture and implementation plan in `ai/plan.md`.
+4. Human approves `ai/plan.md` before implementation starts.
+5. Claude Code implements strictly according to `ai/plan.md`.
+6. Codex performs primary review in `ai/review.md`.
+7. Gemini performs advisory review only in `ai/gemini-review.md`.
+8. Codex reconciles review feedback and decides which comments are actionable.
+9. Blocking review findings go to Fix Implementation, then back to Primary Review.
+10. Human performs runtime validation and functional verification.
+11. Runtime failures are recorded in `ai/runtime-findings.md`.
+12. Runtime failures with unclear root cause go back to Discover; clear implementation defects go to Fix Implementation, then back to Primary Review.
+13. ECC/CI quality gate must pass before merge.
+14. Human performs final approval and merge.
 
 ---
 
@@ -23,9 +29,13 @@ Use this workflow strictly.
 
 Responsibilities:
 
+- context normalization
+- discovery and spec drafting
 - architecture design
 - implementation planning
 - primary code review
+- review reconciliation
+- runtime finding triage
 - final verification
 - architectural consistency validation
 - drift detection
@@ -45,6 +55,7 @@ Codex has final authority on:
 - architecture decisions
 - implementation scope
 - review acceptance
+- runtime failure routing
 - merge readiness
 
 ---
@@ -58,6 +69,8 @@ Role:
 Claude Code must:
 
 - implement only what is defined in `ai/plan.md`
+- implement accepted fixes from `ai/review.md` / reconciliation only when explicitly routed to Fix Implementation
+- implement runtime fixes from `ai/runtime-findings.md` only when root cause is clear and within approved scope
 - preserve existing architecture and repository patterns
 - keep changes minimal and focused
 - update/add tests when necessary
@@ -66,6 +79,7 @@ Claude Code must:
 Claude Code must not:
 
 - redesign architecture
+- resolve unclear runtime failures by guessing
 - introduce unrelated refactors
 - modify files outside planned scope
 - change public APIs without explicit approval
@@ -133,6 +147,106 @@ Human has final merge authority.
 
 ---
 
+# Context Normalize
+
+Use `ai/context.md` before discovery when the input is raw or mixed-context:
+
+- Slack thread
+- Jira ticket
+- screenshot or Figma note
+- voice-like natural language
+- pasted conversation
+- ambiguous product/runtime request
+
+`ai/context.md` must separate:
+
+- original request
+- source/evidence
+- confirmed facts
+- inferred assumptions
+- product/runtime expectation
+- open questions
+- suggested discovery targets
+
+Context Normalize must not create architecture decisions or implementation plans.
+
+---
+
+# Loop Rules
+
+## Review Loop
+
+The review loop is:
+
+```text
+Primary Review
+→ Advisory Review
+→ Reconciliation
+→ Blocking?
+→ Fix Implementation
+→ Primary Review
+```
+
+Reconciliation is a decision step only. It must not be treated as the implementation fix.
+
+## Runtime Failure Loop
+
+The runtime failure loop is:
+
+```text
+Runtime Validation
+→ Runtime Findings
+→ Root cause unclear?
+→ Discover or Fix Implementation
+→ Primary Review
+```
+
+Runtime failures must be written to `ai/runtime-findings.md` before routing.
+
+Route runtime failure to Discover when:
+
+- API contract assumptions are wrong or incomplete
+- lifecycle/timing assumptions are wrong
+- cache invalidation or async ordering assumptions are wrong
+- product/runtime expectation is unclear
+- fixing would require scope expansion beyond `ai/plan.md`
+
+Route runtime failure to Fix Implementation when:
+
+- root cause is clear
+- fix stays within approved plan/spec scope
+- no architecture or product decision is required
+
+---
+
+# State Machine Direction
+
+FlowCore state should be represented as explicit workflow state, not inferred from chat history.
+
+Recommended shape:
+
+```yaml
+state:
+  current: review
+  previous: implementation
+  blocked: false
+  plan_approved: true
+  runtime_verified: false
+  merge_approved: false
+artifacts:
+  context: ai/context.md
+  discovery: ai/discovery.md
+  spec: ai/spec.md
+  plan: ai/plan.md
+  review: ai/review.md
+  advisory_review: ai/gemini-review.md
+  runtime_findings: ai/runtime-findings.md
+```
+
+Future `fc next` behavior should choose the next command from explicit state and artifact availability.
+
+---
+
 # Development Principles
 
 ## Small Iterative Changes
@@ -169,6 +283,7 @@ Implementation scope is defined only by:
 
 - `ai/plan.md`
 - approved follow-up review decisions
+- clear runtime findings that remain inside approved scope
 
 Any additional scope requires explicit approval.
 
@@ -184,6 +299,7 @@ Do not merge if:
 - Codex review has blocking issues
 - implementation deviates from `ai/plan.md`
 - runtime behavior is unverified
+- runtime findings remain unresolved
 - reviewer scope is incomplete
 - unexplained complexity was introduced
 - architecture drift is detected

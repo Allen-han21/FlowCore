@@ -62,6 +62,24 @@ EXTERNAL_CONTEXT_KEYWORDS = [
     "prd",
 ]
 
+NORMALIZE_KEYWORDS = [
+    "slack",
+    "jira",
+    "figma",
+    "스크린샷",
+    "위키",
+    "wiki",
+    "prd",
+    "캡처",
+    "이미지",
+    "첨부",
+    "대화",
+    "스레드",
+    "thread",
+    "음성",
+    "받아쓰기",
+]
+
 ABSTRACT_GOAL_KEYWORDS = [
     "안정성 향상",
     "성능 개선",
@@ -135,6 +153,16 @@ def has_exact_class(task: str) -> bool:
     return bool(class_decl_pattern.search(task))
 
 
+def looks_like_mixed_context(task: str, text: str) -> bool:
+    if contains_any(text, NORMALIZE_KEYWORDS):
+        return True
+    non_empty_lines = [line.strip() for line in task.splitlines() if line.strip()]
+    if len(non_empty_lines) >= 4 and not has_target_file(text):
+        return True
+    speech_markers = ["그러니까", "뭔가", "아마", "같은데", "라고 함", "라고 하네요", "요청 왔"]
+    return contains_any(text, speech_markers)
+
+
 def choose_discover_template(text: str) -> str:
     if "symbol" in text or "심볼" in text or "lsp" in text or "call hierarchy" in text:
         return "discover.symbols"
@@ -153,6 +181,18 @@ def route(task: str) -> RoutingDecision:
     )
     if explicit_ticket_request:
         return RoutingDecision("TICKET", "ticket.from-plan", ["명시적 티켓 초안/생성 요청"], [])
+
+    explicit_review_request = contains_any(text, REVIEW_KEYWORDS)
+    if explicit_review_request and not looks_like_mixed_context(task, text):
+        return RoutingDecision("REVIEW", "review.feature", ["명시적 리뷰/검토 요청"], [])
+
+    if looks_like_mixed_context(task, text):
+        return RoutingDecision(
+            "NORMALIZE",
+            "normalize.context",
+            ["Slack/Jira/screenshot/voice-like 또는 mixed context 요청으로 판단되어 context normalize 선행"],
+            [],
+        )
 
     concrete_anchor = any(
         [
@@ -216,8 +256,8 @@ def route(task: str) -> RoutingDecision:
             matched_discover_rules=sorted(set(matched_rules)),
         )
 
-    # Priority order when discover gate is not matched:
-    # DISCOVER > REVIEW > TICKET > IMPLEMENT > SPEC > PLAN
+    # Priority order when normalize/discover gates are not matched:
+    # NORMALIZE > DISCOVER > REVIEW > TICKET > IMPLEMENT > SPEC > PLAN
     if contains_any(text, REVIEW_KEYWORDS):
         return RoutingDecision("REVIEW", "review.feature", ["리뷰/검토 의도 감지"], [])
     if contains_any(text, TICKET_KEYWORDS):
@@ -266,7 +306,7 @@ def main() -> int:
     command = [sys.executable, str(script_dir / "render_prompt.py"), "--template-id", decision.template_id]
 
     # Templates that require task var.
-    if decision.template_id.startswith(("discover.", "plan.", "spec.", "ticket.", "implement.")):
+    if decision.template_id.startswith(("normalize.", "discover.", "plan.", "spec.", "ticket.", "implement.")):
         command.extend(["--var", f"task={args.task}"])
 
     completed = subprocess.run(command, text=True, check=False, cwd=script_dir.parent.parent.parent.parent)

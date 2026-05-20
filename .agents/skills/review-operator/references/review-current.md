@@ -8,11 +8,12 @@
 
 아래 입력을 순서대로 확인한다.
 
-1. `ai/discovery.md`가 있으면 읽는다.
-2. `ai/spec.md`가 있으면 읽는다.
-3. `ai/plan.md`는 반드시 읽는다.
-4. `AGENTS.md`를 읽는다.
-5. 현재 git 상태와 diff를 확인한다.
+1. `ai/context.md`가 있으면 읽는다.
+2. `ai/discovery.md`가 있으면 읽는다.
+3. `ai/spec.md`가 있으면 읽는다.
+4. `ai/plan.md`는 반드시 읽는다.
+5. `AGENTS.md`를 읽는다.
+6. 현재 git 상태와 diff를 확인한다.
 
 `ai/plan.md`가 없으면 리뷰 기준이 없으므로 일반 코드 리뷰를 진행하지 않는다. 이 경우 `ai/review.md`에 `BLOCKING` 사전조건 실패로 기록하고 중단한다.
 
@@ -24,10 +25,11 @@
 2. `ai/plan.md`에서 구현 범위, out-of-scope, root cause, verification contract를 추출한다.
 3. `ai/spec.md`가 있으면 runtime contract와 expected behavior를 추출한다.
 4. `ai/discovery.md`가 있으면 known risk, 기존 제약, 확인된 원인을 추출한다.
-5. `AGENTS.md`가 있으면 repo-local 실행 규칙과 금지 사항을 추출한다.
-6. 현재 git 상태와 diff 범위를 확인한다.
-7. spec / plan / discovery 기준으로 현재 diff를 리뷰한다.
-8. 결과를 `ai/review.md`에 한국어로 작성한다.
+5. `ai/context.md`가 있으면 normalized request, product expectation, confirmed facts를 추출한다.
+6. `AGENTS.md`가 있으면 repo-local 실행 규칙과 금지 사항을 추출한다.
+7. 현재 git 상태와 diff 범위를 확인한다.
+8. context / spec / plan / discovery 기준으로 현재 diff를 리뷰한다.
+9. 결과를 `ai/review.md`에 한국어로 작성한다.
 
 리뷰 중 구현을 직접 수정하지 않는다. Critical 수준의 결함이 있어도 수정 제안까지만 작성한다.
 
@@ -47,6 +49,7 @@ staged 변경과 unstaged 변경을 모두 리뷰한다. 변경이 없으면 `ai
 
 반드시 확인한다.
 
+- `ai/context.md` normalized request / product expectation 위반 여부
 - `ai/spec.md` runtime contract 준수 여부
 - `ai/plan.md` 구현 범위 준수 여부
 - `ai/discovery.md` known risk 위반 여부
@@ -233,6 +236,7 @@ Human performs runtime/build validation separately.
 # 코드 리뷰 결과
 
 ## Input Status
+- `ai/context.md`: found | missing
 - `ai/discovery.md`: found | missing
 - `ai/spec.md`: found | missing
 - `ai/plan.md`: found | missing
@@ -240,12 +244,13 @@ Human performs runtime/build validation separately.
 
 ## 검토 범위
 - 대상: 현재 git diff
-- 기준 문서: ai/discovery.md, ai/spec.md, ai/plan.md, AGENTS.md
+- 기준 문서: ai/context.md, ai/discovery.md, ai/spec.md, ai/plan.md, AGENTS.md
 - 변경 파일:
   - {파일 경로}
 
 ## 기준 요약
 - Plan scope: {ai/plan.md에서 확인한 범위}
+- Normalized context: {ai/context.md에서 확인한 요청 또는 missing}
 - Runtime contract: {ai/spec.md에서 확인한 계약 또는 missing}
 - Known risk: {ai/discovery.md에서 확인한 위험 또는 missing}
 

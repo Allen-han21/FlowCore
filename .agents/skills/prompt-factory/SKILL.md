@@ -11,7 +11,7 @@ Use this skill to create high-consistency prompts from template IDs instead of m
 It standardizes role boundaries (discover/spec/plan/ticket/implement/review/git), output artifacts, and "do-not-run" constraints.
 
 Recommended workflow for short natural-language requests:
-- `discover.*` -> `spec.*` -> `plan.*` -> `ticket.*` -> `implement.*` -> `review.*`
+- `normalize.context` -> `discover.*` -> `spec.*` -> `plan.*` -> `ticket.*` -> `implement.*` -> `review.*`
 
 For semantic risk-heavy tasks, run symbol pass before planning:
 - `discover.symbols` -> `spec.*` -> `plan.*`
@@ -32,7 +32,8 @@ For semantic risk-heavy tasks, run symbol pass before planning:
 10. 사용자가 구체 수정 위치보다 개선 목표만 제시했다
 
 게이트 충족 시 기본 순서:
-- `discover.*` -> `spec.from-discovery` -> `plan.from-discovery`
+- raw/mixed input이면 `normalize.context`
+- 이후 `discover.*` -> `spec.from-discovery` -> `plan.from-discovery`
 
 Product Context precheck 기본 원칙:
 - Slack/Jira/wiki/PRD/Figma/스크린샷 근거를 보기 전에, 최근 2주 관련 대화부터 우선 확인한다.
@@ -50,7 +51,9 @@ python3 scripts/route_prompt.py \
   "iOS 앱 URL 캐시로 안정성 향상 - 네트워크 불안정 상황에서도 기존 데이터로 안정적인 서비스 제공"
 ```
 
-- Router priority: `DISCOVER` -> `REVIEW` -> `TICKET` -> `IMPLEMENT` -> `SPEC` -> `PLAN`
+- Router priority: `NORMALIZE` -> `DISCOVER` -> `REVIEW` -> `TICKET` -> `IMPLEMENT` -> `SPEC` -> `PLAN`
+- If the request looks like Slack/Jira/screenshot/voice-like mixed context, router chooses `normalize.context` first
+- Explicit review requests without mixed external context may route directly to `review.*`
 - If any DISCOVER gate condition matches, router forces `discover.*` first
 - Router prints `intent`, `template_id`, and `reason`, then renders prompt automatically
 
@@ -98,7 +101,7 @@ python3 scripts/render_prompt.py \
 ## Template Groups
 
 - Planning: `plan.*`
-- Discovery/Spec: `discover.*`, `spec.*`
+- Normalize/Discovery/Spec: `normalize.*`, `discover.*`, `spec.*`
 - Ticket: `ticket.*`
 - Implementation: `implement.*`
 - Review: `review.*`

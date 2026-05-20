@@ -3,6 +3,7 @@
 ## Common Blocks
 
 - `COMMON_USE`: `AGENTS.md`, 기존 패턴, 현재 아키텍처
+- `COMMON_NORMALIZE_RULES`: raw/mixed input 을 engineering request 로 정규화하는 비구현 규칙
 - `COMMON_DISCOVER_RULES`: discovery 단계의 비구현/비추측/열린 질문 규칙 + Product Context 선조회 규칙
 - `COMMON_NO_RUN`: build/test/simulator/xcodebuild/fastlane/runtime 실행 금지
 - `COMMON_IMPLEMENT_RULES`: minimal scope, no unrelated refactor, no redesign
@@ -35,12 +36,27 @@
 10. 사용자가 구체 수정 위치보다 개선 목표만 제시했다
 
 권장 체인:
-- `discover.*` -> `spec.from-discovery` -> `plan.from-discovery`
+- `normalize.context` -> `discover.*` -> `spec.from-discovery` -> `plan.from-discovery`
+
+명시적 review 요청은 mixed external context 가 없으면 `review.*`로 바로 갈 수 있다.
+
+## Context Normalize Gate
+
+아래 중 하나라도 해당하면 DISCOVER 전에 `normalize.context`가 먼저다.
+
+1. Slack/Jira/wiki/PRD/Figma/screenshot 에서 온 원문 또는 붙여넣기다
+2. voice-like text 처럼 말하듯 적힌 요청이다
+3. 여러 출처의 메모가 섞여 있다
+4. product expectation 과 engineering task 가 분리되어 있지 않다
+5. confirmed fact 와 assumption 이 섞여 있다
+
+출력은 `ai/context.md`이며, 이 단계에서는 설계/구현 결정을 내리지 않는다.
 
 ## Template IDs
 
-### Discover / Spec
+### Normalize / Discover / Spec
 
+- `normalize.context` (required: `task`)
 - `discover.general` (required: `task`)
 - `discover.ios-cache` (required: `task`)
 - `discover.symbols` (required: `task`)
@@ -78,6 +94,7 @@
 - `advisory.general`
 - `reconcile.general`
 - `rereview.general`
+- `runtime.findings`
 
 ### Git
 
